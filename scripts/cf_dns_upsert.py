@@ -1,27 +1,36 @@
 #!/usr/bin/env python3
-import argparse, requests, json
+import requests
+import argparse
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--zone-id", required=True)
-parser.add_argument("--token", required=True)
-parser.add_argument("--name", required=True)
-parser.add_argument("--type", default="CNAME")
-parser.add_argument("--content", required=True)
-parser.add_argument("--proxied", default="true")
+parser = argparse.ArgumentParser(description="Create or update DNS record in Cloudflare")
+parser.add_argument("--zone-id", required=True, help="Cloudflare Zone ID")
+parser.add_argument("--token", required=True, help="Cloudflare API Token")
+parser.add_argument("--name", required=True, help="DNS record name (ex: malachias.108mia.com)")
+parser.add_argument("--type", default="CNAME", help="DNS record type")
+parser.add_argument("--content", required=True, help="DNS record content (target)")
+parser.add_argument("--proxied", action="store_true", help="Proxy through Cloudflare (orange cloud)")
 args = parser.parse_args()
 
-headers = {"Authorization": f"Bearer {args.token}", "Content-Type": "application/json"}
-url = f"https://api.cloudflare.com/client/v4/zones/{args.zone-id}/dns_records"
-payload = {"type": args.type, "name": args.name, "content": args.content, "proxied": args.proxied.lower()=="true"}
+print(f"🔧 Criando/atualizando DNS: {args.name} → {args.content}")
 
-r = requests.get(url, headers=headers, params={"name": args.name})
-r.raise_for_status()
-result = r.json()["result"]
+headers = {
+    "Authorization": "Bearer " + args.token,
+    "Content-Type": "application/json"
+}
 
-if result:
-    rec_id = result[0]["id"]
-    u = requests.put(f"{url}/{rec_id}", headers=headers, data=json.dumps(payload))
-    print("🌀 DNS atualizado:", u.json())
+url = f"https://api.cloudflare.com/client/v4/zones/{args.zone_id}/dns_records"
+
+payload = {
+    "type": args.type,
+    "name": args.name,
+    "content": args.content,
+    "proxied": args.proxied
+}
+
+response = requests.post(url, headers=headers, json=payload)
+
+if response.status_code == 200 and response.json().get("success"):
+    print("✅ DNS criado/atualizado com sucesso!")
 else:
-    c = requests.post(url, headers=headers, data=json.dumps(payload))
-    print("🌍 DNS criado:", c.json())
+    print("❌ Falha ao criar/atualizar DNS:")
+    print(response.text)

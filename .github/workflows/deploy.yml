@@ -1,0 +1,39 @@
+name: Deploy Project to Vercel & Cloudflare
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🧠 Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: 📦 Install dependencies
+        run: |
+          pip install requests
+
+      - name: 🚀 Deploy to Vercel
+        run: bash ./scripts/vercel_deploy.sh
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+
+      - name: 🌐 Update Cloudflare DNS
+        run: |
+          python3 ./scripts/cf_dns_upsert.py \
+            --zone-id "${{ secrets.CLOUDFLARE_ZONE_ID }}" \
+            --token "${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            --name "malachias.108mia.com" \
+            --type "CNAME" \
+            --content "cname.vercel-dns.com" \
+            --proxied
