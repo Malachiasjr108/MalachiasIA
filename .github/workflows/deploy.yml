@@ -1,4 +1,4 @@
-name: Deploy Project to Vercel & Cloudflare
+name: 🚀 Deploy Project to Vercel & Cloudflare
 
 on:
   push:
@@ -8,29 +8,29 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: 🧠 Checkout repository
+      - name: 🧰 Checkout repository
         uses: actions/checkout@v3
 
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@v4
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          python-version: '3.10'
+          node-version: 18
 
       - name: 📦 Install dependencies
-        run: |
-          pip install requests
+        run: npm install
 
       - name: 🚀 Deploy to Vercel
-        run: bash ./scripts/vercel_deploy.sh
+        run: |
+          npx vercel --token=$VERCEL_TOKEN --prod --confirm
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
       - name: 🌐 Update Cloudflare DNS
         run: |
-          python3 ./scripts/cf_dns_upsert.py \
+          python3 scripts/cf_dns_upsert.py \
             --zone-id "${{ secrets.CLOUDFLARE_ZONE_ID }}" \
             --token "${{ secrets.CLOUDFLARE_API_TOKEN }}" \
             --name "malachias.108mia.com" \
