@@ -17,18 +17,26 @@ jobs:
         with:
           node-version: 18
 
-      - name: 📦 Install dependencies
-        run: npm install
+      - name: 📦 Install dependencies (ignore errors if no package.json)
+        run: |
+          if [ -f package.json ]; then
+            npm install
+          else
+            echo "No package.json found, skipping npm install."
+          fi
 
       - name: 🚀 Deploy to Vercel
         run: |
-          npx vercel --token=$VERCEL_TOKEN --prod --confirm
+          npm install -g vercel
+          vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+          vercel build --prod --token=$VERCEL_TOKEN
+          vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
-      - name: 🌐 Update Cloudflare DNS
+      - name: 🌐 Update Cloudflare DNS (CNAME)
         run: |
           python3 scripts/cf_dns_upsert.py \
             --zone-id "${{ secrets.CLOUDFLARE_ZONE_ID }}" \
@@ -37,3 +45,5 @@ jobs:
             --type "CNAME" \
             --content "cname.vercel-dns.com" \
             --proxied
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
