@@ -1,0 +1,19 @@
+{
+  "name": "MalachiasAI",
+  "version": "1.0.0",
+  "description": "Agentes autônomos e interface da Malachias AI",
+  "directories": {
+    "core": "./core",
+    "ui": "./ui",
+    "flowise": "./flowise",
+    "scripts": "./scripts"
+  },
+  "ports": {
+    "ui": 3001,
+    "flowise": 3000
+  },
+  "github": {
+    "repo": "Malachiasjr108/MalachiasAI"
+  },
+  "domain": "malachias.108mia.com"
+}

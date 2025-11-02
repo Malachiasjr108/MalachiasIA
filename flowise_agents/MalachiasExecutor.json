@@ -1,0 +1,48 @@
+{
+  "name": "Malachias Executor",
+  "description": "Agente local que transforma instruções em comandos bash e os envia para aprovação antes de executar.",
+  "nodes": [
+    {
+      "id": "input_1",
+      "type": "Chat Input",
+      "data": {
+        "name": "Input",
+        "description": "Entrada de texto do usuário"
+      },
+      "position": { "x": 100, "y": 200 }
+    },
+    {
+      "id": "llm_1",
+      "type": "LLM",
+      "data": {
+        "name": "Comando Generator",
+        "model": "gpt-4o-mini",
+        "prompt": "Você é um assistente especializado em Linux. O usuário fornece uma tarefa, e você deve gerar um comando bash simples e direto, sem explicações. Exemplo: 'npm install && npm run build' ou 'git pull origin main'. Nunca execute nada, apenas gere o comando."
+      },
+      "position": { "x": 400, "y": 200 }
+    },
+    {
+      "id": "bash_1",
+      "type": "Execute Command",
+      "data": {
+        "name": "Fila Local",
+        "command": "bash -c \"cd /home/jeanjr && ./Malachias/scripts/add_command.sh '{{data.result}}'\""
+      },
+      "position": { "x": 800, "y": 200 }
+    },
+    {
+      "id": "output_1",
+      "type": "Chat Output",
+      "data": {
+        "name": "Output",
+        "description": "Mostra o comando que foi enviado para fila"
+      },
+      "position": { "x": 1100, "y": 200 }
+    }
+  ],
+  "connections": [
+    { "source": "input_1", "target": "llm_1" },
+    { "source": "llm_1", "target": "bash_1" },
+    { "source": "bash_1", "target": "output_1" }
+  ]
+}

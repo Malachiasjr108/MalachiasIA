@@ -1,0 +1,18 @@
+services:
+  flowise:
+    image: flowiseai/flowise:latest
+    container_name: flowise
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      FLOWISE_USERNAME: admin
+      FLOWISE_PASSWORD: TroqueEstaSenha123
+      DATABASE_PATH: /root/.flowise
+      FLOWISE_FILE_STORAGE_PATH: /root/.flowise/storage
+      TELEMETRY_ENABLED: "false"
+      METRICS_ENABLED: "false"
+      NODE_OPTIONS: --max_old_space_size=8192
+    volumes:
+      - ~/.flowise:/root/.flowise
+    restart: unless-stopped
